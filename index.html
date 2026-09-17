@@ -282,7 +282,7 @@
 
   <!-- STEP 2: IMAGE GRID -->
   <div class="step" id="step1">
-    <div class="question">🚗 Select all squares with a <u>Car</u></div>
+    <div class="question">🚗 Select all squares with a <u>Auto</u></div>
     <div class="grid" id="grid"></div>
     <div class="hint">If there are none, click the ones that look suspicious.</div>
     <div class="error" id="error1"></div>
@@ -314,20 +314,19 @@
 </div>
 
 <script>
-  // ---------------------------------------------------------------
-  // CONFIG: replace these with real base64 images + correct answer
-  // squareImages[i] = background image (data URI or url) for tile i
-  // correctSelection[i] = 1 if tile i SHOULD be selected, else 0
-  // ---------------------------------------------------------------
+  const img_auto = "https://goodhopemotors.com/wp-content/uploads/2026/03/Full-side-profile-1.jpg";
+  const img_pole = "https://s.alicdn.com/@sc04/kf/H016e5886729e4fbd8fa200cf01f80f94m.jpg_640x640.jpg";
+  const img_sandal = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeZ1b1f-D_RER_WIsfWrN2WKdBRH3PG4txPso7xHFPBQ&s=10";
+
   const squareImages = [
-    "", "", "", "", "", "", "", "", ""
-  ]; // put base64 data URIs here, e.g. "data:image/png;base64,...."
+    img_auto, img_pole, img_sandal,
+    img_pole, img_sandal, img_auto,
+    img_sandal, img_pole, img_auto
+  ];
 
-  const squareEmojis = ["🚗","🌳","🚗","🐱","🚌","🚗","🍕","🌵","🚲"]; // placeholder visuals until real images are provided
+  const squareEmojis = ["🚗","🚗","🚗","🚗","🚗","🚗","🚗","🚗","🚗"]; // fallback if an image fails to load
 
-  const correctSelection = [1,0,1,0,0,1,0,0,0]; // 1 = should be picked (car), 0 = should not
-
-  // ---------------------------------------------------------------
+  const correctSelection = [1,0,0,0,0,1,0,0,1]; // all tiles are cars in this set
 
   let currentStep = 0;
   let selectedTiles = new Set();
@@ -353,11 +352,10 @@
   function shakeStep(stepId){
     const el = document.getElementById(stepId);
     el.classList.remove("shake");
-    void el.offsetWidth; // reflow to restart animation
+    void el.offsetWidth;
     el.classList.add("shake");
   }
 
-  // ---- STEP 1: MATH ----
   function checkMath(){
     const val = document.getElementById("mathAnswer").value.trim();
     const errorEl = document.getElementById("error0");
@@ -373,7 +371,6 @@
     }
   }
 
-  // ---- STEP 2: GRID ----
   function buildGrid(){
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
@@ -384,6 +381,7 @@
       tile.dataset.index = i;
       if(squareImages[i] && squareImages[i].length > 0){
         tile.style.backgroundImage = `url(${squareImages[i]})`;
+        tile.onerror = () => { tile.style.backgroundImage = ""; tile.textContent = squareEmojis[i] || "❓"; };
       } else {
         tile.textContent = squareEmojis[i] || "❓";
       }
@@ -411,11 +409,10 @@
       errorEl.textContent = "";
       goToStep(2);
     } else {
-      showRobotResult("Nice try, but your car-detection skills are... mechanical.");
+      showRobotResult("Nice try, but your Auto-detection skills are... mechanical.");
     }
   }
 
-  // ---- STEP 3: ARE YOU ROBOT ----
   function checkRobot(answerIsYes){
     if(answerIsYes){
       showRobotResult("Wow. Honesty! Unfortunately also a robot. Beep boop, denied.");
@@ -424,7 +421,6 @@
     }
   }
 
-  // ---- RESULTS ----
   const robotFailLines = [
     "Sorry bro, robots are not allowed.",
     "Beep boop detected. Access denied, tin can.",
