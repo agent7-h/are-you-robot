@@ -1,1 +1,465 @@
-//sample
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Are You Robot? 🤖</title>
+<style>
+  :root{
+    --bg1:#8ec5fc;
+    --bg2:#e0c3fc;
+    --card:#ffffff;
+    --accent:#5b6cff;
+    --accent-dark:#3b46c9;
+    --danger:#ff5b5b;
+    --success:#2ecc71;
+    --text:#232336;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Comic Sans MS','Trebuchet MS',sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    color:var(--text);
+  }
+  .card{
+    background:var(--card);
+    border-radius:24px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    padding:36px 32px;
+    max-width:460px;
+    width:100%;
+    position:relative;
+    overflow:hidden;
+    animation:pop .5s ease;
+  }
+  @keyframes pop{
+    from{transform:scale(.85);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+  }
+  h1{
+    text-align:center;
+    font-size:28px;
+    margin:0 0 4px;
+  }
+  .robot-emoji{
+    font-size:46px;
+    display:block;
+    text-align:center;
+    margin-bottom:6px;
+    animation:wiggle 2.2s infinite;
+  }
+  @keyframes wiggle{
+    0%,100%{transform:rotate(0deg);}
+    25%{transform:rotate(-8deg);}
+    75%{transform:rotate(8deg);}
+  }
+  .subtitle{
+    text-align:center;
+    font-size:13px;
+    color:#777;
+    margin-bottom:22px;
+  }
+  .progress{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .dot{
+    width:12px;height:12px;border-radius:50%;
+    background:#ddd;
+    transition:.3s;
+  }
+  .dot.active{background:var(--accent);transform:scale(1.3);}
+  .dot.done{background:var(--success);}
+  .step{
+    display:none;
+    animation:fade .4s ease;
+  }
+  .step.active{display:block;}
+  @keyframes fade{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .question{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  input[type="text"]{
+    width:100%;
+    padding:12px 14px;
+    border:3px solid #ccc;
+    border-radius:12px;
+    font-size:18px;
+    text-align:center;
+    font-family:inherit;
+    outline:none;
+    transition:.2s;
+  }
+  input[type="text"]:focus{border-color:var(--accent);}
+  .hint{
+    text-align:center;
+    font-size:12px;
+    color:#999;
+    margin-top:8px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .tile{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    border:4px solid transparent;
+    transition:.15s;
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+    background-color:#f2f2f2;
+    user-select:none;
+  }
+  .tile:hover{transform:scale(1.04);}
+  .tile.selected{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(91,108,255,0.35) inset;
+  }
+  .tile.selected::after{
+    content:"✔";
+    position:absolute;
+    top:4px;
+    right:6px;
+    background:var(--accent);
+    color:white;
+    border-radius:50%;
+    width:22px;height:22px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+  }
+  .yesno{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-bottom:6px;
+  }
+  .yesno button{
+    flex:1;
+    padding:14px 0;
+    border-radius:12px;
+    border:3px solid var(--accent);
+    background:white;
+    color:var(--accent);
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:.15s;
+  }
+  .yesno button:hover{
+    background:var(--accent);
+    color:white;
+    transform:translateY(-2px);
+  }
+  .btn{
+    display:block;
+    width:100%;
+    margin-top:18px;
+    padding:13px;
+    border:none;
+    border-radius:12px;
+    background:var(--accent);
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    font-family:inherit;
+    transition:.15s;
+  }
+  .btn:hover{background:var(--accent-dark);transform:translateY(-2px);}
+  .btn:disabled{background:#ccc;cursor:not-allowed;transform:none;}
+  .error{
+    color:var(--danger);
+    text-align:center;
+    font-size:13px;
+    margin-top:8px;
+    min-height:16px;
+    font-weight:bold;
+  }
+  .result{
+    text-align:center;
+  }
+  .result .big-emoji{
+    font-size:64px;
+    display:block;
+    margin-bottom:10px;
+    animation:pop .5s ease;
+  }
+  .result h2{
+    margin:0 0 8px;
+  }
+  .result p{
+    color:#555;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .result.robot h2{color:var(--danger);}
+  .result.success h2{color:var(--success);}
+  a.google-link{
+    display:inline-block;
+    margin-top:16px;
+    padding:12px 26px;
+    background:var(--success);
+    color:white;
+    text-decoration:none;
+    border-radius:12px;
+    font-weight:bold;
+    transition:.15s;
+  }
+  a.google-link:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 14px rgba(0,0,0,0.2);
+  }
+  .retry-btn{
+    background:var(--danger);
+  }
+  .retry-btn:hover{background:#d63e3e;}
+  .footer-note{
+    text-align:center;
+    font-size:11px;
+    color:#aaa;
+    margin-top:20px;
+  }
+  .shake{
+    animation:shake .4s;
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+  <span class="robot-emoji" id="headerEmoji">🤖</span>
+  <h1>Are You Robot?</h1>
+  <p class="subtitle">A totally legit and very serious verification process™</p>
+
+  <div class="progress" id="progress">
+    <div class="dot active" data-step="0"></div>
+    <div class="dot" data-step="1"></div>
+    <div class="dot" data-step="2"></div>
+  </div>
+
+  <!-- STEP 1: MATH -->
+  <div class="step active" id="step0">
+    <div class="question">🧮 Solve this incredibly hard math problem</div>
+    <div class="question" style="font-size:26px;">2 + 2 = ?</div>
+    <input type="text" id="mathAnswer" placeholder="Type your answer here" autocomplete="off">
+    <div class="hint">Calculators are technically cheating but we won't tell.</div>
+    <div class="error" id="error0"></div>
+    <button class="btn" onclick="checkMath()">Submit</button>
+  </div>
+
+  <!-- STEP 2: IMAGE GRID -->
+  <div class="step" id="step1">
+    <div class="question">🚗 Select all squares with a <u>Car</u></div>
+    <div class="grid" id="grid"></div>
+    <div class="hint">If there are none, click the ones that look suspicious.</div>
+    <div class="error" id="error1"></div>
+    <button class="btn" onclick="checkGrid()">Verify</button>
+  </div>
+
+  <!-- STEP 3: ARE YOU ROBOT -->
+  <div class="step" id="step2">
+    <div class="question">🤔 Last question. Be honest.</div>
+    <div class="question" style="font-size:22px;">Are you a robot?</div>
+    <div class="yesno">
+      <button onclick="checkRobot(true)">Yes</button>
+      <button onclick="checkRobot(false)">No</button>
+    </div>
+    <div class="hint">This is our most advanced detection method.</div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="stepResult">
+    <div class="result" id="resultBox">
+      <span class="big-emoji" id="resultEmoji"></span>
+      <h2 id="resultTitle"></h2>
+      <p id="resultText"></p>
+      <div id="resultAction"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">No robots were harmed in the making of this test.</div>
+</div>
+
+<script>
+  // ---------------------------------------------------------------
+  // CONFIG: replace these with real base64 images + correct answer
+  // squareImages[i] = background image (data URI or url) for tile i
+  // correctSelection[i] = 1 if tile i SHOULD be selected, else 0
+  // ---------------------------------------------------------------
+  const squareImages = [
+    "", "", "", "", "", "", "", "", ""
+  ]; // put base64 data URIs here, e.g. "data:image/png;base64,...."
+
+  const squareEmojis = ["🚗","🌳","🚗","🐱","🚌","🚗","🍕","🌵","🚲"]; // placeholder visuals until real images are provided
+
+  const correctSelection = [1,0,1,0,0,1,0,0,0]; // 1 = should be picked (car), 0 = should not
+
+  // ---------------------------------------------------------------
+
+  let currentStep = 0;
+  let selectedTiles = new Set();
+
+  const steps = ["step0","step1","step2"];
+  const dots = document.querySelectorAll(".dot");
+
+  function updateProgress(){
+    dots.forEach((d,i)=>{
+      d.classList.remove("active","done");
+      if(i < currentStep) d.classList.add("done");
+      else if(i === currentStep) d.classList.add("active");
+    });
+  }
+
+  function goToStep(idx){
+    document.getElementById(steps[currentStep]).classList.remove("active");
+    currentStep = idx;
+    document.getElementById(steps[currentStep]).classList.add("active");
+    updateProgress();
+  }
+
+  function shakeStep(stepId){
+    const el = document.getElementById(stepId);
+    el.classList.remove("shake");
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add("shake");
+  }
+
+  // ---- STEP 1: MATH ----
+  function checkMath(){
+    const val = document.getElementById("mathAnswer").value.trim();
+    const errorEl = document.getElementById("error0");
+    if(val === "4"){
+      errorEl.textContent = "";
+      goToStep(1);
+      buildGrid();
+    } else if(val === ""){
+      errorEl.textContent = "Uh, you gotta type something, buddy.";
+      shakeStep("step0");
+    } else {
+      showRobotResult("Bro. It's 2+2. Even a calculator from 1974 could do this.");
+    }
+  }
+
+  // ---- STEP 2: GRID ----
+  function buildGrid(){
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    selectedTiles = new Set();
+    for(let i=0;i<9;i++){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.index = i;
+      if(squareImages[i] && squareImages[i].length > 0){
+        tile.style.backgroundImage = `url(${squareImages[i]})`;
+      } else {
+        tile.textContent = squareEmojis[i] || "❓";
+      }
+      tile.addEventListener("click", () => {
+        tile.classList.toggle("selected");
+        if(selectedTiles.has(i)) selectedTiles.delete(i);
+        else selectedTiles.add(i);
+      });
+      grid.appendChild(tile);
+    }
+  }
+
+  function checkGrid(){
+    const errorEl = document.getElementById("error1");
+    let correct = true;
+    for(let i=0;i<9;i++){
+      const isSelected = selectedTiles.has(i);
+      const shouldBeSelected = correctSelection[i] === 1;
+      if(isSelected !== shouldBeSelected){
+        correct = false;
+        break;
+      }
+    }
+    if(correct){
+      errorEl.textContent = "";
+      goToStep(2);
+    } else {
+      showRobotResult("Nice try, but your car-detection skills are... mechanical.");
+    }
+  }
+
+  // ---- STEP 3: ARE YOU ROBOT ----
+  function checkRobot(answerIsYes){
+    if(answerIsYes){
+      showRobotResult("Wow. Honesty! Unfortunately also a robot. Beep boop, denied.");
+    } else {
+      showSuccessResult();
+    }
+  }
+
+  // ---- RESULTS ----
+  const robotFailLines = [
+    "Sorry bro, robots are not allowed.",
+    "Beep boop detected. Access denied, tin can.",
+    "Nice try, Data. Humans only past this point.",
+    "Our sensors say: 60% metal, 40% suspicious."
+  ];
+
+  function showRobotResult(customLine){
+    document.getElementById(steps[currentStep]).classList.remove("active");
+    document.getElementById("stepResult").classList.add("active");
+    const box = document.getElementById("resultBox");
+    box.className = "result robot";
+    document.getElementById("resultEmoji").textContent = "🚫🤖";
+    document.getElementById("resultTitle").textContent = customLine || robotFailLines[Math.floor(Math.random()*robotFailLines.length)];
+    document.getElementById("resultText").textContent = "Please power down, oil your joints, and try again as a human.";
+    document.getElementById("resultAction").innerHTML =
+      `<button class="btn retry-btn" onclick="location.reload()">Try Again</button>`;
+    dots.forEach(d => d.classList.remove("active"));
+  }
+
+  function showSuccessResult(){
+    document.getElementById(steps[currentStep]).classList.remove("active");
+    document.getElementById("stepResult").classList.add("active");
+    const box = document.getElementById("resultBox");
+    box.className = "result success";
+    document.getElementById("resultEmoji").textContent = "✅🧑";
+    document.getElementById("resultTitle").textContent = "Verification Complete!";
+    document.getElementById("resultText").textContent = "Congratulations, certified human. You may now proceed to your extremely important destination.";
+    document.getElementById("resultAction").innerHTML =
+      `<a class="google-link" href="https://treasure-hunt.tamzidshikto.me/checkpoint-9be9abd8f55bb749" target="_blank">Continue to google.com →</a>`;
+    dots.forEach(d => { d.classList.remove("active"); d.classList.add("done"); });
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
